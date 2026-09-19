@@ -1,0 +1,121 @@
+# Opalescent Parallax Waves Visualizer
+
+An interactive visualizer for the **Parallax Wave + Opalescence** stack interactions in Magic: The Gathering.
+
+The goal is to make the multi-Wave sequences easier to follow by showing, for every step:
+
+- each Parallax Wave and its remaining fade counters;
+- which Waves are currently exiled and by which Wave;
+- the stack from top to bottom;
+- persistent action IDs that stay attached to the same activation/trigger;
+- color-coded arrows between the source and target Waves;
+- several distinct lines from the same initial position.
+
+## Scenarios
+
+The current visualizer includes four lines:
+
+1. **Conservative stalemate — B resets correctly**  
+   The basic safe line. C lets `B→C` resolve, then B resets in response to `C→B` and preserves the two-Wave position.
+
+2. **A+B test C — C knows the response**  
+   A+B commits more heavily with `B→B`; C uses the extra `C→A` during B's reset gap and the position loops back.
+
+3. **A+B test C — C misses the response**  
+   C lets `Return(B)` resolve without adding the extra threat and can become stranded in exile.
+
+4. **C tests A+B — B gets greedy**  
+   C follows the simple line, but B fails to reset in response to `C→B`, losing one of the two Waves and collapsing toward a 1v1.
+
+## Sequence DSL
+
+The scenarios are deliberately data-driven so new lines can be added without writing new rendering code.
+
+### Board state
+
+```text
+A4 B3 C2
+```
+
+means A has 4 counters, B has 3, and C has 2.
+
+Special forms:
+
+```text
+Bx    # B is exiled
+CxB   # C is exiled by B
+A5!   # A is a freshly returned/new game object with 5 counters
+```
+
+### Stack
+
+```text
+B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)
+```
+
+The left-most entry is the top of the stack.
+
+Other forms include:
+
+```text
+B>B         # B targets itself / reset attempt
+Return(B)   # B's leave-the-battlefield return trigger
+Fading(C)   # C's fading trigger
+```
+
+The renderer assigns each newly created stack object a persistent numeric ID. The same number is used on its stack entry and board arrow until that object leaves the stack.
+
+## Shared sequence segments
+
+Scenarios are composed from reusable segments rather than duplicating the common opening. For example:
+
+```js
+["opening_to_key", "ab_correct_reset"]
+```
+
+and:
+
+```js
+["opening_to_key", "ab_tests_c_setup", "c_correct_response"]
+```
+
+This keeps the common stack sequence in one place and makes alternative branches easier to compare.
+
+## Running locally
+
+There is no build step and no dependency installation.
+
+Open `index.html` directly, or serve the directory with any static web server, for example:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000`.
+
+## GitHub Pages
+
+This repository is designed to be hosted directly with GitHub Pages.
+
+In **Settings → Pages**:
+
+1. Choose **Deploy from a branch**.
+2. Select `main`.
+3. Select `/ (root)`.
+4. Save.
+
+The site will then be available at:
+
+```text
+https://dgmora.github.io/opalescent-parallax-waves-visualizer/
+```
+
+## Reference
+
+The interaction is based on the discussion around **Parallax Wave + Opalescence** and this article:
+
+https://docs.google.com/document/d/e/2PACX-1vQEW3hgl_gxjLwuTjdH5hoIZKxWNXAUotSipazs2pv60AzC0CUuwrjxjINJkgVfnKOquMgIgm6HZHc4/pub
+
+The displayed Parallax Wave card image is loaded from Scryfall.
+
+Magic: The Gathering, Parallax Wave, Opalescence, and related card names are property of Wizards of the Coast. This project is an unofficial rules/strategy visualization.
