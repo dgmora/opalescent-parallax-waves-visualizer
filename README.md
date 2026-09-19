@@ -17,17 +17,17 @@ The goal is to make the multi-Wave sequences easier to follow by showing, for ev
 
 The current visualizer includes four lines:
 
-1. **Conservative stalemate — B resets correctly**  
-   The basic safe line. C lets `B→C` resolve, then B resets in response to `C→B` and preserves the two-Wave position.
+1. **Conservative stalemate — Twin resets T2 correctly**  
+   The basic safe line. Solo lets `T2→S` resolve, then Twin resets T2 in response to `S→T2` and preserves the two-Wave position.
 
-2. **A+B test C — C knows the response**  
-   A+B commits more heavily with `B→B`; C uses the extra `C→A` during B's reset gap and the position loops back.
+2. **Twin test C — C knows the response**  
+   Twin commits more heavily with `T2→T2`; Solo uses the extra `S→T1` during B's reset gap and the position loops back.
 
-3. **A+B test C — C misses the response**  
-   C lets `Return(B)` resolve without adding the extra threat and can become stranded in exile.
+3. **Twin test C — C misses the response**  
+   Solo lets `Return(T2)` resolve without adding the extra threat and can become stranded in exile.
 
-4. **C tests A+B — B gets greedy**  
-   C follows the simple line, but B fails to reset in response to `C→B`, losing one of the two Waves and collapsing toward a 1v1.
+4. **C tests Twin — B gets greedy**  
+   Solo follows the simple line, but Twin fails to reset in response to `S→T2`, losing one of the two Waves and collapsing toward a 1v1.
 
 ## Sequence DSL
 
@@ -36,7 +36,7 @@ The scenarios are deliberately data-driven so new lines can be added without wri
 ### Board state
 
 ```text
-A4 B3 C2
+T14 T23 S2
 ```
 
 means A has 4 counters, B has 3, and C has 2.
@@ -44,15 +44,15 @@ means A has 4 counters, B has 3, and C has 2.
 Special forms:
 
 ```text
-Bx    # B is exiled
-CxB   # C is exiled by B
-A5!   # A is a freshly returned/new game object with 5 counters
+T2x   # T2 is exiled
+SxT2  # S is exiled by T2
+T15!  # T1 is a freshly returned/new game object with 5 counters
 ```
 
 ### Stack
 
 ```text
-B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)
+T2>S | S>T2 | T2>S | S>T1 | T1>S | S>S | Fading(S)
 ```
 
 The left-most entry is the top of the stack.
@@ -60,9 +60,9 @@ The left-most entry is the top of the stack.
 Other forms include:
 
 ```text
-B>B         # B targets itself / reset attempt
-Return(B)   # B's leave-the-battlefield return trigger
-Fading(C)   # C's fading trigger
+T2>T2       # T2 targets itself / reset attempt
+Return(T2)  # T2's leave-the-battlefield return trigger
+Fading(S)   # S's fading trigger
 ```
 
 The renderer assigns each newly created stack object a persistent numeric ID. The same number is used on its stack entry and board arrow until that object leaves the stack.
