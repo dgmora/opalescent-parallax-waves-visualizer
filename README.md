@@ -1,5 +1,7 @@
 # Opalescent Parallax Waves Visualizer
 
+**Public visualization:** https://dgmora.github.io/opalescent-parallax-waves-visualizer/
+
 An interactive visualizer for the **Parallax Wave + Opalescence** stack interactions in Magic: The Gathering.
 
 The goal is to make the multi-Wave sequences easier to follow by showing, for every step:
@@ -81,38 +83,11 @@ and:
 
 This keeps the common stack sequence in one place and makes alternative branches easier to compare.
 
-## Running locally
 
-There is no build step and no dependency installation.
 
-Open `index.html` directly, or serve the directory with any static web server, for example:
+## References
 
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000`.
-
-## GitHub Pages
-
-This repository is designed to be hosted directly with GitHub Pages.
-
-In **Settings → Pages**:
-
-1. Choose **Deploy from a branch**.
-2. Select `main`.
-3. Select `/ (root)`.
-4. Save.
-
-The site will then be available at:
-
-```text
-https://dgmora.github.io/opalescent-parallax-waves-visualizer/
-```
-
-## Reference
-
-The interaction is based on the discussion around **Parallax Wave + Opalescence** and this article:
+The interaction is based on the discussion around **Parallax Wave + Opalescence** and this article. Some of the scenarios are also based on conversations from the **Replenish Discord**:
 
 https://docs.google.com/document/d/e/2PACX-1vQEW3hgl_gxjLwuTjdH5hoIZKxWNXAUotSipazs2pv60AzC0CUuwrjxjINJkgVfnKOquMgIgm6HZHc4/pub
 
