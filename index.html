@@ -14,8 +14,6 @@ body { margin:0; background:#0f1217; color:#eef2f7; }
 main { max-width:1240px; margin:0 auto; padding:22px 18px 44px; }
 h1 { margin:0 0 8px; font-size:30px; }
 .sub { color:#adb7c7; line-height:1.5; margin-bottom:16px; }
-.legend,.dsl-legend { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 16px; }
-.pill { border:1px solid #313948; background:#1a202a; color:#dfe6f2; border-radius:999px; padding:7px 11px; font-size:13px; }
 .tabs { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 12px; }
 .tab {
   border:1px solid #364152; background:#1a2029; color:#dfe6f2;
@@ -26,7 +24,6 @@ h1 { margin:0 0 8px; font-size:30px; }
   background:#161b23; border:1px solid #27303c; border-radius:14px;
   padding:14px 16px; margin-bottom:14px;
 }
-.meta h2 { margin:0 0 6px; font-size:19px; }
 .meta p { margin:0; color:#c6cfdb; line-height:1.5; }
 .controls { display:flex; align-items:center; justify-content:center; gap:10px; margin:12px 0 18px; }
 button.nav {
@@ -39,30 +36,43 @@ button.nav:disabled { opacity:.35; cursor:not-allowed; }
 .progress>div { height:100%; width:0; background:#8190aa; transition:width .15s ease; }
 .layout { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(320px,.8fr); gap:16px; }
 .panel { background:#161b23; border:1px solid #28313d; border-radius:14px; padding:16px; }
-#title { margin:0 0 8px; }
-.action { font-size:17px; line-height:1.5; margin-bottom:14px; color:#edf1f7; }
+#title { margin:0 0 14px; }
 #board-wrap { position:relative; }
 #arrow-layer {
   position:absolute; inset:0; width:100%; height:100%;
   pointer-events:none; overflow:visible; z-index:3;
 }
-.players { display:grid; grid-template-columns:1fr 1fr; gap:14px; position:relative; }
+.players { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; position:relative; }
 .player { border:1px solid #323b49; border-radius:12px; padding:12px; position:relative; z-index:1; }
 .player h3 { margin:0 0 10px; font-size:15px; color:#dce3ef; }
-.cards { display:flex; flex-wrap:wrap; gap:12px; min-height:260px; align-items:flex-start; }
-.card-wrap { width:145px; position:relative; }
+.cards { display:flex; flex-wrap:wrap; gap:12px; min-height:260px; align-items:flex-start; justify-content:center; }
+.lineage { display:flex; flex-direction:column; gap:12px; }
+.card-wrap { --wave:#6b7280; width:145px; position:relative; }
 .card-box {
   position:relative; width:145px; aspect-ratio:488/680; border-radius:12px; overflow:hidden;
   box-shadow:0 6px 18px rgba(0,0,0,.35); border:1px solid #323a46; background:#0d1015;
 }
 .card-box img { width:100%; height:100%; object-fit:cover; display:block; }
-.card-box.exiled { opacity:.34; filter:grayscale(.6); }
+/* Opacity is the hover-dimming channel and nothing else, so a card off the
+   battlefield says so instead of fading. */
+.card-box.exiled img { filter:grayscale(.9) brightness(.42); }
 .card-box.exiled::after {
   content:attr(data-overlay); position:absolute; inset:0; display:grid; place-items:center;
-  font-weight:800; letter-spacing:.06em; font-size:15px; color:#fff;
-  background:rgba(0,0,0,.34); text-shadow:0 2px 5px #000;
+  font-weight:800; letter-spacing:.04em; font-size:13px; color:#fff;
+  background:rgba(9,12,17,.42); text-shadow:0 2px 5px #000;
 }
-.card-box.new { outline:3px solid #c9d7ff; outline-offset:2px; }
+
+/* An object a return has replaced keeps its place, its size and its counter.
+   The dashed frame and the ghost of the art say it is no longer the card that
+   acts, without spending the opacity that hover dimming needs. */
+.card-wrap.gone .card-box {
+  background:transparent; box-shadow:none;
+  border:2px dashed color-mix(in srgb, var(--wave) 50%, #2a323e);
+}
+.card-wrap.gone .card-box img { opacity:.12; }
+.card-wrap.gone .card-label::after {
+  content:"replaced"; display:block; font-size:12px; font-weight:400; color:#93a0b2;
+}
 .token {
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   width:58px; height:58px; border-radius:50%; display:grid; place-items:center;
@@ -71,42 +81,53 @@ button.nav:disabled { opacity:.35; cursor:not-allowed; }
 }
 .token.hidden { display:none; }
 .card-label { margin-top:7px; text-align:center; font-weight:700; border:1px solid #3d4656; border-radius:7px; padding:5px 6px; }
-.wave-a .card-label { background:#16301d; border-color:#3c6d40; }
-.wave-b .card-label { background:#162238; border-color:#345ea8; }
-.wave-c .card-label { background:#331919; border-color:#8f3333; }
-.wave-a .token { background:#45a049; }
-.wave-b .token { background:#4f8dff; }
-.wave-c .token { background:#d94b4b; }
+.card-label { background:color-mix(in srgb, var(--wave) 18%, #11151b); border-color:color-mix(in srgb, var(--wave) 55%, #11151b); }
+.token { background:var(--wave); }
 
 .note {
-  margin-top:14px; color:#c8d0db; line-height:1.55; padding:10px 12px;
+  margin-top:16px; font-size:16px; color:#dbe2ec; line-height:1.55; padding:12px 14px;
   background:#202630; border-left:3px solid #667287; border-radius:7px;
 }
+.fork { margin:10px 0 0; }
+.fork a {
+  display:inline-block; padding:8px 12px; border-radius:9px; font-size:14px; font-weight:600;
+  color:#dfe6f2; background:#1a2029; border:1px solid #587099; text-decoration:none;
+}
+.fork a:hover { background:#283244; }
 .stack-title { display:flex; justify-content:space-between; align-items:end; gap:8px; }
 .stack-title h2 { margin:0; }
 .stack-title small { color:#9ba5b4; }
 .stack { list-style:none; padding:0; margin:12px 0 0; }
-.stack li { border:1px solid #364050; border-radius:10px; padding:8px 10px; margin:6px 0; font-weight:600; }
+.stack li { --wave:#6b7280; border:1px solid #364050; border-radius:10px; padding:8px 10px; margin:6px 0; font-weight:600; }
 .stack-entry { display:flex; align-items:center; gap:10px; }
 .stack-num {
   width:28px; height:28px; min-width:28px; border-radius:50%;
   display:grid; place-items:center; font-size:13px; font-weight:800; color:#fff;
   border:2px solid rgba(255,255,255,.16);
+  /* Centring the line box leaves digits low by half the unused descent. */
+  line-height:1; padding-bottom:.08em;
+}
+.stack-num.inline {
+  display:inline-grid; width:22px; height:22px; min-width:22px;
+  font-size:12px; vertical-align:middle; margin:0 1px;
+}
+.card-ref, .stack-num.inline, .stack li { cursor:default; }
+.card-ref {
+  display:inline-block; padding:1px 6px; border-radius:6px; font-weight:800;
+  border:1px solid color-mix(in srgb, var(--wave) 55%, #11151b);
+  background:color-mix(in srgb, var(--wave) 22%, #11151b);
 }
 .stack-entry-text { flex:1; }
 .stack li:first-child { border-width:2px; }
-.stack-a { border-color:#3c6d40; background:#16261a; }
-.stack-b { border-color:#345ea8; background:#162031; }
-.stack-c { border-color:#8f3333; background:#2b1717; }
-.stack-return-a { border-color:#3c6d40; background:#16261a; }
-.stack-return-b { border-color:#345ea8; background:#162031; }
-.stack-return-c { border-color:#8f3333; background:#2b1717; }
-.stack-fading { border-color:#555; background:#262626; }
-.stack-a .stack-num,.stack-return-a .stack-num { background:#45a049; }
-.stack-b .stack-num,.stack-return-b .stack-num { background:#4f8dff; }
-.stack-c .stack-num,.stack-return-c .stack-num { background:#d94b4b; }
-.stack-fading .stack-num { background:#666; }
+.stack li { border-color:color-mix(in srgb, var(--wave) 65%, #11151b); background:color-mix(in srgb, var(--wave) 16%, #11151b); }
+.stack-num { background:var(--wave); }
 .empty { color:#929aaa; font-weight:400!important; font-style:italic; }
+
+.arrow { pointer-events:auto; }
+.stack li { transition:opacity .12s ease; }
+.stack.dimmed li:not(.hot) { opacity:.25; }
+.arrow { transition:opacity .12s ease; }
+#arrow-layer.dimmed .arrow:not(.hot) { opacity:.12; }
 
 .arrow-underlay { fill:none; stroke:#0b0e13; stroke-width:6; stroke-linecap:round; opacity:.9; }
 .arrow-line { fill:none; stroke-width:3.2; stroke-linecap:round; opacity:.97; }
@@ -116,16 +137,13 @@ button.nav:disabled { opacity:.35; cursor:not-allowed; }
   font-size:11px; font-weight:900; fill:#fff;
   text-anchor:middle; dominant-baseline:middle;
 }
-.return-note { font-size:12px; fill:#d7dee8; font-weight:700; }
 
-.footer {
-  margin-top:16px; border:1px solid #323a46; background:#141920;
-  border-radius:12px; padding:14px; color:#c8cfda; line-height:1.55;
-}
-.footer code { background:#1e252f; border:1px solid #2c3745; border-radius:5px; padding:2px 5px; color:#f0f4fa; }
-.segment-badge {
-  display:inline-block; margin-top:7px; font-size:12px; color:#9eabbc;
-}
+.path { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:10px; font-size:13px; color:#9eabbc; }
+.path-sep { color:#5c6778; }
+.choices { display:contents; }
+.choice { border-color:#8190aa; }
+.choice.active { background:#283244; border-color:#587099; }
+.controls { flex-wrap:wrap; }
 @media (max-width:880px) {
   .layout,.players { grid-template-columns:1fr; }
   .card-wrap,.card-box { width:132px; }
@@ -135,46 +153,37 @@ button.nav:disabled { opacity:.35; cursor:not-allowed; }
 <body>
 <main>
   <h1>On the physics of collisions between Opalescent Parallax Waves — A visualization</h1>
-  <div class="sub">
-    Four distinct lines, all starting from the actual initial state and reusing the same sequence segments before they branch. Twin is the player controlling two Waves (T1 and T2), while Solo is the player controlling one (S).
+  <div class="sub" id="intro">
+    Three lines. The first starts from the actual initial state — Twin controlling two Waves against Solo's one — and forks twice, once for each player's decision, into four endings; where it forks, the branches take the place of Next. The other two strip the board down to one Wave each — Kazz against Zakk — which is the simplest position where every Parallax Wave question still has to be answered.
   </div>
 
   <div class="tabs" id="tabs"></div>
 
   <div class="meta">
-    <h2 id="scenario-title"></h2>
     <p id="scenario-summary"></p>
-    <span class="segment-badge" id="segment-badge"></span>
+    <div class="path" id="path"></div>
   </div>
 
   <div class="progress"><div id="bar"></div></div>
 
   <div class="controls">
-    <button class="nav" id="prev">← Previous</button>
+    <button class="nav" id="prev">‹ Previous</button>
     <span id="counter"></span>
-    <button class="nav" id="next">Next →</button>
+    <button class="nav" id="next">Next ›</button>
+    <span class="choices" id="choices"></span>
   </div>
 
   <div class="layout">
     <section class="panel">
       <h2 id="title"></h2>
-      <div id="action" class="action"></div>
 
       <div id="board-wrap">
         <svg id="arrow-layer"></svg>
-        <div class="players">
-          <div class="player">
-            <h3>Twin — two-Wave side</h3>
-            <div class="cards" id="ab"></div>
-          </div>
-          <div class="player">
-            <h3>Solo — one-Wave side</h3>
-            <div class="cards" id="c"></div>
-          </div>
-        </div>
+        <div class="players" id="players"></div>
       </div>
 
       <div class="note" id="note"></div>
+      <p class="fork" id="fork"></p>
     </section>
 
     <aside class="panel">
@@ -187,510 +196,6 @@ button.nav:disabled { opacity:.35; cursor:not-allowed; }
   </div>
 </main>
 
-<script>
-const CARD = 'https://cards.scryfall.io/normal/front/c/e/cef789e8-e4cc-4f61-bc15-debc2487777f.jpg?1783945841';
-const SEGMENTS = {"opening_to_key":[{"title":"0. Solo's upkeep: fading trigger","action":"Start of the interaction.","note":"Twin controls T1 and T2. Solo controls S. Stack is shown TOP → BOTTOM.","board":"A5 B5 C5","stack":"Fading(C)"},{"title":"1. S → S","action":"S attempts to reset itself in response to its fading trigger.","note":"S pays one counter. If this resolves cleanly, S leaves and returns fresh.","board":"A5 B5 C4","stack":"C>C | Fading(C)"},{"title":"2. T1 → S","action":"T1 attacks S before S's reset can resolve.","note":"T1 tries to exploit S's reset attempt.","board":"A4 B5 C4","stack":"A>C | C>C | Fading(C)"},{"title":"3. S → T1","action":"S counter-threatens T1.","note":"If S later leaves before this resolves, T1 may be permanently exiled unless T1 resets.","board":"A4 B5 C3","stack":"C>A | A>C | C>C | Fading(C)"},{"title":"4. T2 → S","action":"The second opposing Wave joins the attack.","note":"Two Waves now pressure the lone S.","board":"A4 B4 C3","stack":"B>C | C>A | A>C | C>C | Fading(C)"},{"title":"5. S → T2","action":"S counter-threatens T2.","note":"S now has pending threats against both T1 and T2.","board":"A4 B4 C2","stack":"C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"6. T2 → S again","action":"T2 attacks S a second time.","note":"This is the key position: A4 / B3 / C2.","board":"A4 B3 C2","stack":"B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"}],"ab_correct_reset":[{"title":"7. Solo lets T2 → S resolve","action":"S is exiled by T2.","note":"S does not need to add anything here. The next item is the old S→T2 threat.","board":"A4 B3 CxB","stack":"C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"8. Twin resets T2 correctly","action":"Twin responds to S→T2 with T2→T2.","note":"This is the correct knowledge-check response for the two-Wave side.","board":"A4 B2 CxB","stack":"B>B | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"9. T2 → T2 resolves","action":"T2 exiles itself; T2's leave trigger is created.","note":"Because S is exiled by T2, Return(T2) will return S too.","board":"A4 Bx CxB","stack":"Return(B) | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"Return(T2) resolves — T2 returns","action":"T2 returns as a fresh object.","note":"Visual phase 1/2 of the same Return(T2) resolution. S is returned by this same trigger too; it is shown in the next visual step. There is no priority window between these two visual phases.","board":"A4 B5! CxB","stack":"Return(B) | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"Return(T2) completes — S returns","action":"S returns as a fresh object.","note":"Visual phase 2/2 of the same Return(T2) resolution. Now the old S→T2 targets the old T2, not this newly returned T2.","board":"A4 B5! C5!","stack":"C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"11. Position stabilizes","action":"Old targeted abilities lose relevance as their targets have become new objects.","note":"The two-Wave side preserved both Waves; the game remains in the stalemate structure.","board":"A4 B5! C5!","stack":""}],"ab_greedy_mistake":[{"title":"7. Solo lets T2 → S resolve","action":"S is exiled by T2.","note":"Again, S simply passes here.","board":"A4 B3 CxB","stack":"C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"8. Twin gets greedy","action":"Twin lets S→T2 resolve instead of resetting T2.","note":"This is the mistake S is hoping the two-Wave player makes.","board":"A4 Bx CxB","stack":"Return(B) | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"9. T2's leave trigger resolves","action":"T2's leave trigger returns S, because S was exiled by T2.","note":"But nothing returns T2: T2 was exiled by the old S after that old S had already left.","board":"A4 Bx C5!","stack":"B>C | C>A | A>C | C>C | Fading(C)"},{"title":"10. Old T2 → S fails","action":"The older T2→S was targeting the old S.","note":"The relevant remaining threat is now old S→T1.","board":"A4 Bx C5!","stack":"C>A | A>C | C>C | Fading(C)"},{"title":"11. T1 must protect itself","action":"T1 must reset rather than allow the old S→T1 to strand T1 in exile.","note":"The two-Wave side has already lost T2; the position is collapsing to a one-Wave-vs-one-Wave fight.","board":"A3 Bx C5!","stack":"A>A | C>A | A>C | C>C | Fading(C)"},{"title":"12. T1 returns","action":"T1 resets and returns fresh.","note":"T2 is still gone. The two-Wave advantage has been thrown away.","board":"A5! Bx C5!","stack":""}],"ab_tests_c_setup":[{"title":"7. Twin commits: T2 → T2","action":"Instead of resolving the top T2→S, Twin adds T2→T2.","note":"This is the more committal line used to test whether S knows the reset-gap response.","board":"A4 B2 C2","stack":"B>B | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"8. T2 → T2 resolves","action":"T2 exiles itself and creates Return(T2).","note":"Now S gets the important decision window while T2 is absent.","board":"A4 Bx C2","stack":"Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"}],"c_correct_response":[{"title":"9. Solo uses the fourth activation","action":"Before Return(T2) resolves, S adds S→T1.","note":"This is the key response the lone-Wave player must know.","board":"A4 Bx C1","stack":"C>A | Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"10. T1 → S","action":"T1 answers by targeting S.","note":"T1 cannot ignore the new S→T1 threat.","board":"A3 Bx C1","stack":"A>C | C>A | Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"11. T1 → S resolves","action":"S is exiled by T1.","note":"The top old S→T1 is still on the stack.","board":"A3 Bx CxA","stack":"C>A | Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"12. T1 is forced to reset","action":"T1 adds T1→T1 to avoid being permanently exiled by old S→T1.","note":"Because S is under T1, T1's reset will return S.","board":"A2 Bx CxA","stack":"A>A | C>A | Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"13. T1 → T1 resolves","action":"T1 leaves and creates Return(T1).","note":"Return(T1) will bring both T1 and S back fresh.","board":"Ax Bx CxA","stack":"Return(A) | C>A | Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"Return(T1) resolves — T1 returns","action":"T1 returns as a fresh object.","note":"Visual phase 1/2 of the same Return(T1) resolution. S is returned by this same trigger as well; the next visual step shows that part. There is no priority window between them.","board":"A5! Bx CxA","stack":"Return(A) | C>A | Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"Return(T1) completes — S returns","action":"S returns as a fresh object.","note":"Visual phase 2/2 of the same Return(T1) resolution. The old S→T1 no longer points at this newly returned T1.","board":"A5! Bx C5!","stack":"C>A | Return(B) | B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"15. Return(T2) resolves","action":"T2 returns too.","note":"All three Waves are fresh again; the trap did not work.","board":"A5! B5! C5!","stack":""}],"c_misses_response":[{"title":"9. Solo passes","action":"S lets Return(T2) resolve without adding the extra S→T1.","note":"This is the mistake Twin is hoping S will make.","board":"A4 B5! C2","stack":"B>C | C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"10. Old T2 → S resolves","action":"The old T2→S exiles S after old T2 has already left.","note":"That old T2's leave trigger already happened, so there is no later trigger from old T2 that can return this S.","board":"A4 B5! CxB","stack":"C>B | B>C | C>A | A>C | C>C | Fading(C)"},{"title":"11. Old S → T2 fails","action":"The old S→T2 targeted the old T2, not the new T2.","note":"S has not traded its exile for T2.","board":"A4 B5! CxB","stack":"B>C | C>A | A>C | C>C | Fading(C)"},{"title":"12. Remaining old stack unwinds","action":"T1 can still protect itself from the old S→T1 if necessary.","note":"But T1's reset does not return S, because S was exiled by T2.","board":"A5! B5! CxB","stack":""},{"title":"13. Outcome","action":"S remains stranded in exile.","note":"This is exactly why the fourth S→T1 must be added before Return(T2) resolves.","board":"A5! B5! CxB","stack":""}]};
-const SCENARIO_DEFS = [{"id":"conservative-stalemate","label":"Conservative stalemate — Twin resets correctly","summary":"The basic safe line from the real initial state. Solo lets the top T2→S resolve; when S→T2 becomes dangerous, Twin resets T2 and returns S, preserving the stalemate.","segments":["opening_to_key","ab_correct_reset"]},{"id":"ab-tests-c-correct","label":"Twin tests Solo — Solo knows the response","summary":"Twin gets more ambitious and adds T2→T2 before the top T2→S resolves. Solo correctly uses the extra S→T1 during T2's reset gap, so the line loops back to stalemate.","segments":["opening_to_key","ab_tests_c_setup","c_correct_response"]},{"id":"ab-tests-c-mistake","label":"Twin tests Solo — Solo misses the response","summary":"Same aggressive test from Twin, but Solo lets Return(T2) resolve without adding the extra S→T1 and gets stranded in exile.","segments":["opening_to_key","ab_tests_c_setup","c_misses_response"]},{"id":"c-tests-ab-mistake","label":"Solo tests Twin — Twin gets greedy","summary":"S follows the simple line and lets T2→S resolve. If T2 then fails to reset in response to S→T2, T2 gets stranded and the two-Wave side collapses toward a 1v1.","segments":["opening_to_key","ab_greedy_mistake"]}];
-
-function splitStack(stackStr) {
-  if (!stackStr || !stackStr.trim()) return [];
-  return stackStr.split("|").map(s => s.trim()).filter(Boolean);
-}
-
-// Longest-common-subsequence matching lets us carry the same action ID
-// forward from one step to the next, even when new actions are pushed on top
-// or resolved actions disappear.
-function lcsMatches(prevEntries, nextItems) {
-  const a = prevEntries.map(e => e.raw);
-  const b = nextItems;
-  const dp = Array.from({length:a.length+1}, () => Array(b.length+1).fill(0));
-
-  for (let i=a.length-1; i>=0; i--) {
-    for (let j=b.length-1; j>=0; j--) {
-      dp[i][j] = a[i] === b[j]
-        ? 1 + dp[i+1][j+1]
-        : Math.max(dp[i+1][j], dp[i][j+1]);
-    }
-  }
-
-  const matches = [];
-  let i=0, j=0;
-  while (i<a.length && j<b.length) {
-    if (a[i] === b[j]) {
-      matches.push([i,j]);
-      i++; j++;
-    } else if (dp[i+1][j] >= dp[i][j+1]) {
-      i++;
-    } else {
-      j++;
-    }
-  }
-  return matches;
-}
-
-function compileStableStackIds(steps) {
-  let nextId = 1;
-  let prevEntries = [];
-
-  return steps.map(step => {
-    const items = splitStack(step.stack);
-    const matches = lcsMatches(prevEntries, items);
-    const byNextIndex = new Map();
-
-    for (const [prevIdx, nextIdx] of matches) {
-      byNextIndex.set(nextIdx, prevEntries[prevIdx].id);
-    }
-
-    const entries = items.map((raw, idx) => {
-      const id = byNextIndex.has(idx) ? byNextIndex.get(idx) : nextId++;
-      return { raw, id };
-    });
-
-    prevEntries = entries;
-    return { ...step, _stackEntries: entries };
-  });
-}
-
-function buildScenario(def) {
-  const flatSteps = [];
-  for (const segmentName of def.segments) {
-    const segment = SEGMENTS[segmentName] || [];
-    for (const step of segment) {
-      flatSteps.push({ ...step, _segment: segmentName });
-    }
-  }
-  return { ...def, steps: compileStableStackIds(flatSteps) };
-}
-
-const SCENARIOS = SCENARIO_DEFS.map(buildScenario);
-let activeScenario = 0;
-const positions = {};
-SCENARIOS.forEach(s => positions[s.id] = 0);
-
-function displayWave(wave) {
-  return wave === "A" ? "T1" : wave === "B" ? "T2" : wave === "C" ? "S" : wave;
-}
-
-function displayStackText(raw) {
-  return raw
-    .replace(/Return\(([ABC])\)/g, (_, w) => `Return(${displayWave(w)})`)
-    .replace(/Fading\(([ABC])\)/g, (_, w) => `Fading(${displayWave(w)})`)
-    .replace(/([ABC])>([ABC])/g, (_, from, to) => `${displayWave(from)}>${displayWave(to)}`);
-}
-
-function waveColor(wave, alpha=1) {
-  if (wave === "A") return `rgba(69,160,73,${alpha})`;
-  if (wave === "B") return `rgba(79,141,255,${alpha})`;
-  if (wave === "C") return `rgba(217,75,75,${alpha})`;
-  return `rgba(140,140,140,${alpha})`;
-}
-
-function parseBoard(boardStr) {
-  const out = {
-    A:{wave:"A",state:"battlefield",counters:5,exiledBy:null,fresh:false},
-    B:{wave:"B",state:"battlefield",counters:5,exiledBy:null,fresh:false},
-    C:{wave:"C",state:"battlefield",counters:5,exiledBy:null,fresh:false}
-  };
-  if (!boardStr || !boardStr.trim()) return out;
-
-  for (const tok of boardStr.trim().split(/\s+/)) {
-    const m = tok.match(/^([ABC])(x([ABC])?|(\d+)(!)?)$/);
-    if (!m) continue;
-    const wave = m[1];
-    if (m[2][0] === "x") {
-      out[wave].state = "exiled";
-      out[wave].counters = null;
-      out[wave].exiledBy = m[3] || null;
-      out[wave].fresh = false;
-    } else {
-      out[wave].state = "battlefield";
-      out[wave].counters = Number(m[4]);
-      out[wave].fresh = !!m[5];
-      out[wave].exiledBy = null;
-    }
-  }
-  return out;
-}
-
-function parseStack(stackStr) {
-  return splitStack(stackStr);
-}
-
-function parseAction(item) {
-  const m = item.match(/([ABC])>([ABC])/);
-  if (m) return {type:"action",from:m[1],to:m[2]};
-  const r = item.match(/Return\(([ABC])\)/);
-  if (r) return {type:"return",wave:r[1]};
-  const f = item.match(/Fading\(([ABC])\)/);
-  if (f) return {type:"fading",wave:f[1]};
-  return null;
-}
-
-function colorClassForParsed(parsed) {
-  if (!parsed) return "stack-fading";
-  if (parsed.type==="action") return `stack-${parsed.from.toLowerCase()}`;
-  if (parsed.type==="return") return `stack-return-${parsed.wave.toLowerCase()}`;
-  return "stack-fading";
-}
-
-function renderStackItem(entry) {
-  const parsed=parseAction(entry.raw);
-  const cls=colorClassForParsed(parsed);
-  return `<li class="${cls}">
-    <div class="stack-entry">
-      <div class="stack-num">${entry.id}</div>
-      <div class="stack-entry-text">${displayStackText(entry.raw).replaceAll(">","→")}</div>
-    </div>
-  </li>`;
-}
-
-function cardHtml(wave,info) {
-  const waveClass=`wave-${wave.toLowerCase()}`;
-  let cls="card-box";
-  if (info.state==="exiled") cls+=" exiled";
-  if (info.fresh) cls+=" new";
-  let overlay="EXILED";
-  if (info.exiledBy) overlay=`EXILED BY ${displayWave(info.exiledBy)}`;
-  const tokenClass=info.counters===null ? "token hidden" : "token";
-
-  return `<div class="card-wrap ${waveClass}" data-wave="${wave}">
-    <div class="${cls}" data-overlay="${overlay}">
-      <img src="${CARD}" alt="Parallax Wave">
-      <div class="${tokenClass}">${info.counters ?? ""}</div>
-    </div>
-    <div class="card-label">Wave ${displayWave(wave)}</div>
-  </div>`;
-}
-
-function makeSvgEl(name,attrs={}) {
-  const el=document.createElementNS("http://www.w3.org/2000/svg",name);
-  for (const [k,v] of Object.entries(attrs)) el.setAttribute(k,v);
-  return el;
-}
-
-function getCenter(el,boardRect) {
-  const r=el.getBoundingClientRect();
-  return {x:r.left-boardRect.left+r.width/2,y:r.top-boardRect.top+r.height/2};
-}
-
-function drawMarker(svg,x,y,n,fill) {
-  const g=makeSvgEl("g");
-  const c=makeSvgEl("circle",{cx:x,cy:y,r:11.5,fill:fill,class:"arrow-label-circle"});
-  const t=makeSvgEl("text",{x:x,y:y+0.5,class:"arrow-label-text"});
-  t.textContent=n;
-  g.appendChild(c); g.appendChild(t); svg.appendChild(g);
-}
-
-function drawText(svg,x,y,text) {
-  const t=makeSvgEl("text",{x:x,y:y,class:"return-note"});
-  t.textContent=text; svg.appendChild(t);
-}
-
-
-
-function appendOutlinedPath(svg, d, color, markerId, secondary=false, dashed=false) {
-  const underlay = makeSvgEl("path", {
-    d,
-    class:"arrow-underlay",
-    ...(dashed ? {"stroke-dasharray":"7 5"} : {})
-  });
-  svg.appendChild(underlay);
-
-  const path = makeSvgEl("path", {
-    d,
-    class:`arrow-line${secondary ? " secondary" : ""}`,
-    stroke:color,
-    "marker-end":`url(#${markerId})`,
-    ...(dashed ? {"stroke-dasharray":"7 5"} : {})
-  });
-  svg.appendChild(path);
-}
-
-function quadraticPoint(p0,p1,p2,t) {
-  const u=1-t;
-  return {
-    x:u*u*p0.x+2*u*t*p1.x+t*t*p2.x,
-    y:u*u*p0.y+2*u*t*p1.y+t*t*p2.y
-  };
-}
-
-function cubicPoint(p0,p1,p2,p3,t) {
-  const u=1-t;
-  return {
-    x:u*u*u*p0.x+3*u*u*t*p1.x+3*u*t*t*p2.x+t*t*t*p3.x,
-    y:u*u*u*p0.y+3*u*u*t*p1.y+3*u*t*t*p2.y+t*t*t*p3.y
-  };
-}
-
-function getCardRect(el, boardRect) {
-  const r=el.getBoundingClientRect();
-  return {
-    left:r.left-boardRect.left,
-    right:r.right-boardRect.left,
-    top:r.top-boardRect.top,
-    bottom:r.bottom-boardRect.top,
-    width:r.width,
-    height:r.height,
-    cx:r.left-boardRect.left+r.width/2,
-    cy:r.top-boardRect.top+r.height/2
-  };
-}
-
-function sidePoint(rect, side, frac=.5, offset=0) {
-  if (side==="left") return {x:rect.left, y:rect.top+rect.height*frac+offset};
-  if (side==="right") return {x:rect.right, y:rect.top+rect.height*frac+offset};
-  if (side==="top") return {x:rect.left+rect.width*frac+offset, y:rect.top};
-  return {x:rect.left+rect.width*frac+offset, y:rect.bottom};
-}
-
-function drawLocalHorizontal(svg, fromWave, toWave, fromRect, toRect, color, actionId, laneIndex, reverseExists) {
-  const leftToRight = fromRect.cx < toRect.cx;
-
-  // Opposite directions use different vertical ports, so arrowheads are visibly separate.
-  let frac;
-  if (reverseExists) {
-    frac = leftToRight ? .40 : .62;
-  } else {
-    frac = .50;
-  }
-
-  const laneOffset = laneIndex * 13;
-  const signedLane = laneIndex===0 ? 0 : (laneIndex%2 ? laneOffset : -laneOffset);
-
-  const start=sidePoint(fromRect,leftToRight?"right":"left",frac,signedLane);
-  const end=sidePoint(toRect,leftToRight?"left":"right",frac,signedLane);
-
-  const gap=Math.abs(end.x-start.x);
-  const controlPull=Math.min(50,Math.max(22,gap*.35));
-
-  const c1={x:start.x+(leftToRight?controlPull:-controlPull),y:start.y};
-  const c2={x:end.x-(leftToRight?controlPull:-controlPull),y:end.y};
-
-  const d=`M ${start.x} ${start.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${end.x} ${end.y}`;
-  appendOutlinedPath(svg,d,color,`arrowhead-${fromWave}`,laneIndex>0);
-
-  const labelT = laneIndex % 2 ? .38 : .62;
-  const lp=cubicPoint(start,c1,c2,end,labelT);
-  drawMarker(svg,lp.x,lp.y,actionId,color);
-}
-
-function drawAC(svg, fromWave, toWave, aRect, cRect, color, actionId, laneIndex) {
-  const aToC = fromWave==="A";
-
-  // A<->C must avoid B. Use two compact corridors just above the cards.
-  // Opposite directions get separate heights.
-  const baseY=Math.min(aRect.top,cRect.top) - (aToC ? 24 : 50) - laneIndex*16;
-
-  const fromRect=aToC?aRect:cRect;
-  const toRect=aToC?cRect:aRect;
-
-  const start=sidePoint(fromRect,"top",aToC?.72:.28, aToC?0:0);
-  const end=sidePoint(toRect,"top",aToC?.28:.72,0);
-
-  const c1={x:start.x+(aToC?42:-42),y:baseY};
-  const c2={x:end.x-(aToC?42:-42),y:baseY};
-
-  const d=`M ${start.x} ${start.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${end.x} ${end.y}`;
-  appendOutlinedPath(svg,d,color,`arrowhead-${fromWave}`,laneIndex>0);
-
-  const lp=cubicPoint(start,c1,c2,end,.5);
-  drawMarker(svg,lp.x,lp.y-2,actionId,color);
-}
-
-function drawLoop(svg,wave,rect,color,actionId,laneIndex=0) {
-  // Self-target loops stay outside the card, on the least crowded side.
-  const side = wave==="A" ? "left" : "right";
-  const dir = side==="left" ? -1 : 1;
-  const widen=laneIndex*14;
-
-  const start=sidePoint(rect,side,.37);
-  const end=sidePoint(rect,side,.63);
-
-  const c1={x:start.x+dir*(36+widen),y:start.y-16};
-  const c2={x:end.x+dir*(36+widen),y:end.y+16};
-
-  const d=`M ${start.x} ${start.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${end.x} ${end.y}`;
-  appendOutlinedPath(svg,d,color,`arrowhead-${wave}`,true);
-
-  const lp=cubicPoint(start,c1,c2,end,.5);
-  drawMarker(svg,lp.x+dir*3,lp.y,actionId,color);
-}
-
-function drawReturn(svg,wave,rect,n) {
-  const color=waveColor(wave,.95);
-  const side=wave==="A"?"left":"right";
-  const dir=side==="left"?-1:1;
-
-  const start=sidePoint(rect,side,.72);
-  const end=sidePoint(rect,side,.28);
-  const c1={x:start.x+dir*30,y:start.y};
-  const c2={x:end.x+dir*30,y:end.y};
-
-  const d=`M ${start.x} ${start.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${end.x} ${end.y}`;
-  appendOutlinedPath(svg,d,color,`arrowhead-${wave}`,true,true);
-
-  const lp=cubicPoint(start,c1,c2,end,.5);
-  drawMarker(svg,lp.x,lp.y,n,color);
-}function drawArrows(stackEntries) {
-  const board=document.getElementById("board-wrap");
-  const svg=document.getElementById("arrow-layer");
-  const boardRect=board.getBoundingClientRect();
-
-  svg.setAttribute("viewBox",`0 0 ${boardRect.width} ${boardRect.height}`);
-  svg.innerHTML="";
-
-  const defs=makeSvgEl("defs");
-  for (const wave of ["A","B","C"]) {
-    const marker=makeSvgEl("marker",{
-      id:`arrowhead-${wave}`,
-      markerWidth:"4.2",
-      markerHeight:"4.2",
-      refX:"3.8",
-      refY:"2.1",
-      orient:"auto",
-      markerUnits:"strokeWidth"
-    });
-    marker.appendChild(makeSvgEl("path",{
-      d:"M 0 0 L 4.2 2.1 L 0 4.2 z",
-      fill:waveColor(wave,1)
-    }));
-    defs.appendChild(marker);
-  }
-  svg.appendChild(defs);
-
-  const rects={};
-  for (const wave of ["A","B","C"]) {
-    const el=document.querySelector(`[data-wave="${wave}"] .card-box`);
-    if (el) rects[wave]=getCardRect(el,boardRect);
-  }
-
-  const parsed=stackEntries.map(entry=>({
-    raw:entry.raw,
-    actionId:entry.id,
-    parsed:parseAction(entry.raw)
-  })).filter(x=>x.parsed);
-
-  const directions=new Set();
-  for (const entry of parsed) {
-    const p=entry.parsed;
-    if (p.type==="action" && p.from!==p.to) directions.add(`${p.from}>${p.to}`);
-  }
-
-  const sameDirectionCount={};
-  const selfCount={};
-
-  parsed.forEach((entry,stackIdx)=>{
-    const p=entry.parsed;
-    if (p.type==="fading") return;
-
-    const alpha=Math.max(.55,1-stackIdx*.055);
-
-    if (p.type==="return") {
-      if (rects[p.wave]) drawReturn(svg,p.wave,rects[p.wave],entry.actionId);
-      return;
-    }
-
-    const color=waveColor(p.from,alpha);
-
-    if (p.from===p.to) {
-      const lane=selfCount[p.from]||0;
-      selfCount[p.from]=lane+1;
-      if (rects[p.from]) drawLoop(svg,p.from,rects[p.from],color,entry.actionId,lane);
-      return;
-    }
-
-    if (!rects[p.from] || !rects[p.to]) return;
-
-    const key=`${p.from}>${p.to}`;
-    const lane=sameDirectionCount[key]||0;
-    sameDirectionCount[key]=lane+1;
-
-    if ((p.from==="A" && p.to==="C") || (p.from==="C" && p.to==="A")) {
-      drawAC(svg,p.from,p.to,rects.A,rects.C,color,entry.actionId,lane);
-      return;
-    }
-
-    const reverseExists=directions.has(`${p.to}>${p.from}`);
-    drawLocalHorizontal(
-      svg,p.from,p.to,
-      rects[p.from],rects[p.to],
-      color,entry.actionId,lane,reverseExists
-    );
-  });
-}
-function renderTabs() {
-  const tabs=document.getElementById("tabs");
-  tabs.innerHTML=SCENARIOS.map((s,idx)=>`
-    <button class="tab ${idx===activeScenario?"active":""}" data-idx="${idx}">${s.label}</button>
-  `).join("");
-  tabs.querySelectorAll(".tab").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      activeScenario=Number(btn.dataset.idx);
-      render();
-    });
-  });
-}
-
-function currentScenario(){return SCENARIOS[activeScenario];}
-function currentStepIndex(){return positions[currentScenario().id];}
-function setCurrentStepIndex(v){positions[currentScenario().id]=v;}
-
-function render() {
-  renderTabs();
-  const scenario=currentScenario();
-  const stepIdx=currentStepIndex();
-  const step=scenario.steps[stepIdx];
-  const board=parseBoard(step.board);
-  const stackEntries=step._stackEntries || [];
-
-  document.getElementById("scenario-title").textContent=scenario.label;
-  document.getElementById("scenario-summary").textContent=scenario.summary;
-  document.getElementById("segment-badge").textContent=`segment: ${step._segment}`;
-
-  const cleanTitle = step.title.replace(/^\d+\.\s*/, "");
-  document.getElementById("title").textContent=`${stepIdx}. ${cleanTitle}`;
-  document.getElementById("action").textContent=step.action;
-  document.getElementById("note").textContent=step.note;
-  document.getElementById("ab").innerHTML=cardHtml("A",board.A)+cardHtml("B",board.B);
-  document.getElementById("c").innerHTML=cardHtml("C",board.C);
-
-  const stack=document.getElementById("stack");
-  stack.innerHTML=stackEntries.length
-    ? stackEntries.map(entry=>renderStackItem(entry)).join("")
-    : `<li class="empty">empty</li>`;
-
-  document.getElementById("counter").textContent=`${stepIdx+1} / ${scenario.steps.length}`;
-  document.getElementById("prev").disabled=stepIdx===0;
-  document.getElementById("next").disabled=stepIdx===scenario.steps.length-1;
-  document.getElementById("bar").style.width=`${(stepIdx/Math.max(1,scenario.steps.length-1))*100}%`;
-
-  requestAnimationFrame(()=>drawArrows(stackEntries));
-}
-
-document.getElementById("prev").addEventListener("click",()=>{
-  const idx=currentStepIndex();
-  if(idx>0)setCurrentStepIndex(idx-1);
-  render();
-});
-document.getElementById("next").addEventListener("click",()=>{
-  const idx=currentStepIndex(),max=currentScenario().steps.length-1;
-  if(idx<max)setCurrentStepIndex(idx+1);
-  render();
-});
-window.addEventListener("resize",()=>requestAnimationFrame(render));
-document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowLeft"){
-    const idx=currentStepIndex();
-    if(idx>0)setCurrentStepIndex(idx-1);
-    render();
-  }
-  if(e.key==="ArrowRight"){
-    const idx=currentStepIndex(),max=currentScenario().steps.length-1;
-    if(idx<max)setCurrentStepIndex(idx+1);
-    render();
-  }
-});
-render();
-</script>
+<script type="module" src="./src/ui.js"></script>
 </body>
 </html>

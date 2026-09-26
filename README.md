@@ -15,75 +15,118 @@ The goal is to make the multi-Wave sequences easier to follow by showing, for ev
 
 ## Scenarios
 
-The current visualizer includes four lines:
+The visualizer has three lines. The first starts from the real three-Wave
+position and forks twice, once for each player's decision, into four endings.
+Where the line forks, the branches take the place of the Next button, and the
+URL records the branches taken (`#twin-vs-solo/solo-passes/twin-resets/12`):
 
-1. **Conservative stalemate — Twin resets T2 correctly**  
-   The basic safe line. Solo lets `T2→S` resolve, then Twin resets T2 in response to `S→T2` and preserves the two-Wave position.
-
-2. **Twin test C — C knows the response**  
-   Twin commits more heavily with `T2→T2`; Solo uses the extra `S→T1` during B's reset gap and the position loops back.
-
-3. **Twin test C — C misses the response**  
-   Solo lets `Return(T2)` resolve without adding the extra threat and can become stranded in exile.
-
-4. **C tests Twin — B gets greedy**  
-   Solo follows the simple line, but Twin fails to reset in response to `S→T2`, losing one of the two Waves and collapsing toward a 1v1.
-
-## Sequence DSL
-
-The scenarios are deliberately data-driven so new lines can be added without writing new rendering code.
-
-### Board state
-
-```text
-T14 T23 S2
+```
+Opening: seven steps to the key position, T2 → S on top of the stack
+├─ Solo lets T2 → S resolve
+│   ├─ Twin resets T2           The safe line: Twin resets in response to S→T2
+│   │                           and returns S, preserving the two-Wave position.
+│   └─ Twin passes, gets greedy Twin fails to reset, T2 is stranded, and the
+│                               position collapses toward a 1v1.
+└─ Twin sets the trap: T2 → T2  Drops the pending T2→S below T2's own return
+    │                           trigger and turns it into a permanent exile.
+    ├─ Solo resets S            The exile lands on a card that is already gone,
+    │                           and the position loops back.
+    └─ Solo counter-attacks     S is exiled for good, and leaving hands T1 back
+                                to Twin at five counters.
 ```
 
-means A has 4 counters, B has 3, and C has 2.
+The other two are the same rules with one Wave on each side — Kazz's `K` against
+Zakk's `Z` — which is the position the first line passes through once a Wave has
+exiled itself. Step 15 of the safe line links straight into them:
 
-Special forms:
+- **Duel — the permanent exile backfires**  
+  `Z` stacks `Z→K` first and `Z→Z` on top, so its leave trigger resolves before the exile does. While `Z` is away Zakk can answer nothing, and Kazz plays the same trick on the permanent that cannot reset. Both Waves come back at five; that permanent never does.
 
-```text
-T2x   # T2 is exiled
-SxT2  # S is exiled by T2
-T15!  # T1 is a freshly returned/new game object with 5 counters
-```
+- **Duel — trading exiles down to the last counter**  
+  Kazz on two counters, Zakk on three, trading exiles until both are at one. Zakk spends the last counter on a reset; Kazz resets in response, comes back at five, and spends the refill on exiling Zakk's Wave for good.
 
-### Stack
+## How a scenario is written
 
-```text
-T2>S | S>T2 | T2>S | S>T1 | T1>S | S>S | Fading(S)
-```
-
-The left-most entry is the top of the stack.
-
-Other forms include:
-
-```text
-T2>T2       # T2 targets itself / reset attempt
-Return(T2)  # T2's leave-the-battlefield return trigger
-Fading(S)   # S's fading trigger
-```
-
-The renderer assigns each newly created stack object a persistent numeric ID. The same number is used on its stack entry and board arrow until that object leaves the stack.
-
-## Shared sequence segments
-
-Scenarios are composed from reusable segments rather than duplicating the common opening. For example:
+Scenarios are not drawn by hand. Each step says what a player *did*, and the
+engine in `src/engine.js` works out the board and the stack from there.
 
 ```js
-["opening_to_key", "ab_correct_reset"]
+{ play: act("B", "B"),
+  say: { title: "8. Twin resets T2 correctly",
+         note: "Twin responds to [[6]] with [[8]]. [[4]] and [[6]] are still pending." } }
 ```
 
-and:
+A step is a headline and one explanation, shown under the board. `[[6]]` in
+either renders as the numbered pill of stack entry 6, in
+that entry's colour — the same pill shown in the stack list and on the arrow
+that draws it. Prose can name an ability instead of describing it. The entry has
+to be on the stack at that step; `npm test` fails otherwise.
+
+There are three things a step can play:
 
 ```js
-["opening_to_key", "ab_tests_c_setup", "c_correct_response"]
+upkeep("solo")     // that player's permanents get their fading trigger
+act("B", "C")      // B removes a fade counter to exile C; goes on the stack
+resolve            // resolve the top of the stack
 ```
 
-This keeps the common stack sequence in one place and makes alternative branches easier to compare.
+A step plays one of those and nothing more, so nothing ever happens off-screen
+between two pictures. Two shorthands stand in for the parts that need no
+commentary: `unwind` runs out the rest of the stack, one step per resolution,
+and `auto` writes the narration from what the resolution did.
 
+```js
+{ play: resolve, say: auto },
+{ play: unwind },
+```
 
+Scenarios are built from named segments, so the shared opening lives in one
+place and the branches stay easy to compare:
+
+```js
+segments: ["twin-vs-solo", "twin-trap", "solo-resets"]
+```
+
+Each segment carries a `label` and a `summary`. Scenarios that open with the
+same segment are one line and share a tab; where their segment lists diverge,
+the page stops and offers the next segments by label, and the summary shown is
+the one for the segment on screen.
+A scenario can also name its own starting board with `setup:`, which is how the
+duel lines put one Wave against one, and any step can offer a `fork:` to another
+scenario — a link under the narration, for when the position on screen is better
+understood somewhere simpler.
+
+## What the engine models
+
+Every permanent is a game object with an identity. When one is exiled and
+returned it comes back as a *new* object, so an ability still pointing at the
+old one does nothing when it resolves. Exile remembers which object did it, and
+a leave trigger returns whatever that same object had exiled — which is why a
+Wave exiled by a Wave that has already gone never comes back.
+
+The card an exiled Wave sits under says which case it is in:
+
+- `EXILED` — it exiled itself, and its own trigger will return it;
+- `EXILED BY T2` — T2 can still return it;
+- `EXILED FOREVER` — the T2 that exiled it is gone, and nothing will return it;
+- `SACRIFICED` — fading ran out of counters and took the Wave, which returns what it was holding.
+
+The engine has no idea what a Parallax Wave is. It knows about counters, a
+cost, a targeted exile, and a leave trigger, all described in one `CARDS` entry.
+
+## Running and testing
+
+The page is plain HTML and ES modules, so it needs to be served rather than
+opened from disk — the same way GitHub Pages serves it:
+
+```sh
+npm start         # http://localhost:8000
+npm test          # replays every scenario and checks it against test/golden.js
+```
+
+`test/golden.js` is the hand-authored data from before the engine existed. Two
+of its boards are corrected against the rules; both corrections are explained
+in the commit that adds the file.
 
 ## References
 
